@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>JavaScript之作用域与闭包 | ZJBlog</title><link rel="stylesheet" type="text/css" href="//fonts.neworld.org/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">JavaScript之作用域与闭包</h1><a id="logo" href="/.">ZJBlog</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">JavaScript之作用域与闭包</h1><div class="post-meta"><a href="/2018/05/21/JavaScript之作用域与闭包/#comments" class="comment-count"></a><p><span class="date">May 21, 2018</span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><h3 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h3><p>作用域（Scope）在 JavaScript 中是一个重要的概念。说白了，作用域表示的是一个变量的可用范围，包括两种：</p>
+<ul>
+<li><p>全局作用域（全局变量）：随处可用，可反复使用——容易造成全局污染</p>
+</li>
+<li><p>函数作用域（局部作用域）：仅函数内可用，不可重复使用</p>
+</li>
+</ul>
+<p>下面看一段简单的代码：</p>
+<pre><code>var a = 10;
+function fun() {
+    var a = 100;
+    a++;
+    console.log(a);
+}
+fun(); // 101
+console.log(a); // 10
+</code></pre><p>上面代码中的 fun 函数外的 a 为全局变量，fun 函数里的 a 为局部变量。</p>
+<p>我们可以通过函数的生命周期来理解作用域：</p>
+<ol>
+<li>在开始执行上述代码前，JS会先创建执行环境栈（ECS），临时保存正在执行的函数的执行环境，并向执行环境栈中压入第一个默认函数main()，然后，创建全局作用域对象window。如下图所示：</li>
+</ol>
+<p><img src="/2018/05/21/JavaScript之作用域与闭包/func1.png" alt=""></p>
+<ol start="2">
+<li>在定义函数时，JS会创建函数对象，封装函数定义，声明函数名变量，引用函数对象，函数对象的scope属性饮用回创建函数时的作用域。如下图所示：</li>
+</ol>
+<p><img src="/2018/05/21/JavaScript之作用域与闭包/func2.png" alt=""></p>
+<ol start="3">
+<li>调用函数时，ECS中压入一个新的元素（执行环境）记录新函数的调用，创建一个活动对象，保存本次函数调用用到的局部变量；ESC中的新执行环境元素，引用活动对象； 活动对象中的parent属性引用函数的scope；执行过程中：优先使用活动对象中的局部变量，局部没有才沿着parent向父级作用域找。如下图所示：</li>
+</ol>
+<p><img src="/2018/05/21/JavaScript之作用域与闭包/func3.png" alt=""></p>
+<ol start="4">
+<li>函数调用后，执行环境栈中本次函数的执行环境出栈，活动对象被释放，局部变量一同释放。如下图所示：</li>
+</ol>
+<p><img src="/2018/05/21/JavaScript之作用域与闭包/func4.png" alt=""></p>
+<h3 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h3><p>闭包（Closure）是 JavaScript 最强大的特性之一。闭包在日常编码工作中非常常见。但是，它会对性能造成影响。</p>
+<p>通过上述作用域我们知道：全局变量可以反复使用，但极易被污染，而局部变量仅函数内部可用，不可重用。如果既想重用变量，又想保护变量不被污染，那么我们就可以采用闭包。闭包是既重用变量，又保护变量不被污染的一种机制。</p>
+<p>一般采取以下三个步骤即可实现闭包：</p>
+<pre><code>1. 用外层函数包裹受保护的变量和操作变量的内层函数
+2. 外层函数将内层函数返回
+3. 使用者调用外层函数，获得内层函数的对象
+
+function outer() {
+    var i=1;  // AO
+    return function() {
+        console.log(i++);
+    }
+
+}
+var getNum=outer();
+getNum();//1
+getNum();//2
+getNum();//3
+</code></pre></div><div class="tags"><a href="/tags/JavaScript/">JavaScript</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2018/08/12/使用ionic开发APP/" class="pre">使用ionic开发APP</a><a href="/2017/08/24/hello-world/" class="next">Hello World</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#作用域"><span class="toc-text">作用域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#闭包"><span class="toc-text">闭包</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/08/27/自定义cordova插件开发以及使用/">自定义 cordova 插件开发以及使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/08/12/使用ionic开发APP/">使用ionic开发APP</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/05/21/JavaScript之作用域与闭包/">JavaScript之作用域与闭包</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/08/24/hello-world/">Hello World</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/Ionic/" style="font-size: 15px;">Ionic</a> <a href="/tags/APP/" style="font-size: 15px;">APP</a> <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/cordova/" style="font-size: 15px;">cordova</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a></li></ul></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">Zong Jian.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script type="text/javascript" src="/js/search.json.js?v=2.0.1"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.1" async></script><script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":["mshare","weixin","tsina","qzone","linkedin","fbook","twi","print","renren","sqq","evernotecn","bdysc","tqq","tqf","bdxc","kaixin001","tieba","douban","bdhome","thx","ibaidu","meilishuo","mogujie","diandian","huaban","duitang","hx","fx","youdao","sdo","qingbiji","people","xinhua","mail","isohu","yaolan","wealink","ty","iguba","h163","copy"],"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{},"image":{"viewList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"]}};with(document)0[(getElementsByTagName('head')[0]||head).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script></body></html>
