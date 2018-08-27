@@ -2,17 +2,17 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
     <sitemap>
-        <loc>http://yoursite.com/post-sitemap.xml</loc>
+        <loc>https://zongjian.site/post-sitemap.xml</loc>
         <lastmod>2018-08-27T05:38:46.378Z</lastmod>
     </sitemap>
 
     <sitemap>
-        <loc>http://yoursite.com/page-sitemap.xml</loc>
+        <loc>https://zongjian.site/page-sitemap.xml</loc>
         <lastmod>2018-08-27T02:09:33.193Z</lastmod>
     </sitemap>
 
     <sitemap>
-        <loc>http://yoursite.com/tag-sitemap.xml</loc>
+        <loc>https://zongjian.site/tag-sitemap.xml</loc>
         <lastmod>2018-08-27T04:27:58.505Z</lastmod>
     </sitemap>
 
